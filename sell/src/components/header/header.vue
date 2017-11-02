@@ -1,13 +1,211 @@
 <template>
   <div class="header">
-    hello world, header!!
+    <div class="content-wrapper">
+      <div class="avatar">
+        <img width="64" height="64" :src="seller.avatar">
+      </div>
+      <div class="content">
+        <div class="title">
+          <span class="brand"></span>
+          <span class="name">{{seller.name}}</span>
+        </div>
+        <div class="description">
+          {{seller.description}}/{{seller.deliveryTime}}分钟送达
+        </div>
+        <div v-if="seller.supports" class="support">
+          <span class="icon" :class="classMap[seller.supports[0].type]"></span>
+          <span class="text">{{seller.supports[0].description}}</span>
+        </div>
+      </div>
+      <div v-if="seller.supports" class="support-count" @click="showDetail">
+        <span class="count">{{seller.supports.length}}个</span>
+         <i class="icon-keyboard_arrow_right"></i>
+      </div>
+    </div>
+    <div class="bulletin-wrapper" @click="showDetail">
+      <span class="bulletin-title"></span><span class="bulletin-text">{{seller.bulletin}}</span>
+      <i class="icon-keyboard_arrow_right"></i>
+    </div>
+    <div class="background">
+      <img :src="seller.avatar" width="100%" height="100%">
+    </div>
+    <div v-show="detailShow" class="detail">
+      <!-- sticky footer布局，面试常问的 -->
+      <div class="detail-wrapper clearfix">
+        <div class="detail-main">
+          <h1>{{seller.name}}</h1>
+          <div class="star-wrapper">
+            
+          </div>
+        </div>
+      </div>
+      <div class="detail-close">
+        <i class="icon-close"></i>
+      </div>
+    </div>
   </div>
 </template>
 
-<script>
+<script type="text/ecmascript-6">
 export default {
-  name: 'header'
+  props: {
+    seller: {
+      type: Object
+    }
+  },
+  data() {
+    return {
+      // 控制浮层的显示、隐藏
+      detailShow: false
+    };
+  },
+  methods: {
+    showDetail() {
+      this.detailShow = true;
+    }
+  },
+  created() {
+    this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
+  }
 };
 </script>
 
-<style lang="stylus" rel='stylesheet/stylus'></style>
+<style lang="stylus" rel='stylesheet/stylus'>
+  @import "../../common/stylus/mixin";
+  .header
+    position: relative
+    overflow: hidden // 超出的阴影裁掉
+    color: #fff
+    background: rgba(7, 17, 27, 0.5)
+    .content-wrapper
+      position: relative
+      padding: 24px 12px 18px 24px
+      font-size: 0 // 给父元素设置font-size为零可以去除子元素中的空白字符引起的间距，不过子元素要各自设置各自的font-size，不然会直接继承父元素的属性
+      .avatar
+        display: inline-block
+        vertical-align: top
+        img
+          border-radius: 2px
+      .content
+        display: inline-block
+        margin-left: 16px
+        .title
+          margin: 2px 0 8px 0
+          .brand
+            display: inline-block
+            //左右两个元素不对齐，可以设置对齐方式
+            vertical-align: top
+            width: 30px
+            height: 18px
+            bg-image('brand')
+            background-size: 30px 18px
+            background-repeat: no-repeat
+          .name
+            margin-left: 6px
+            font-size: 16px
+            line-height: 18px
+            font-weight: bold
+        .description
+          margin-bottom: 10px
+          line-height: 12px
+          font-size: 12px
+        .support
+          .icon
+            display: inline-block
+            vertical-align: top
+            width: 12px
+            height: 12px
+            margin-right: 4px
+            background-size: 12px 12px
+            background-repeat: no-repeat
+            &.decrease
+              bg-image('decrease_2')
+            &.discount
+                bg-image('discount_2')
+            &.guarantee
+              bg-image('guarantee_2')
+            &.invoice
+              bg-image('invoice_2')
+            &.special
+              bg-image('special_2')
+          .text
+            line-height: 12px
+            font-size: 10px
+      .support-count
+        position: absolute
+        right: 12px
+        bottom: 14px
+        padding: 0 8px
+        height: 24px
+        line-height: 24px
+        border-radius: 14px
+        background: rgba(0, 0, 0, 0.2)
+        text-align: center
+        .count
+          font-size: 10px
+        .icon-keyboard_arrow_right
+          font-size: 10px
+          margin-left: 2px
+          line-height: 24px
+    .bulletin-wrapper
+      position: relative
+      height: 28px
+      line-height: 28px
+      padding: 0 22px 0 12px
+      // 三个属性组合使用显示省略号...
+      white-space: nowrap
+      overflow: hidden
+      text-overflow: ellipsis
+      background: rgba(7, 17, 27, 0.2)
+      /*font-size: 0 //两个span紧挨着默认会有一个margin，需要设置父元素的font-size为零*/
+      .bulletin-title
+        display: inline-block
+        // 这里会有左边图片和右边的文字不居中对其的现象，先让两者都靠上对其，然后调整margin
+        vertical-align: top
+        margin-top: 8px
+        width: 22px
+        height: 12px
+        bg-image('bulletin')
+        background-size: 22px 12px //要设置跟div一致，不然图片会很大不显示
+      .bulletin-text
+        vertical-align: top
+        font-size: 10px
+        margin: 0 4px
+      .icon-keyboard_arrow_right
+        position: absolute
+        font-size: 10px
+        right: 12px
+        top: 8px
+    .background
+      position: absolute
+      top: 0
+      left: 0
+      width: 100%
+      height: 100%
+      z-index: -1 //设置为-1就会放到底部当背景
+      filter: blur(10px) //背景模糊
+    .detail
+      position: fixed
+      z-index: 100 //在最上面显示
+      // 设置 top和left为零就可以显示全屏了，这里思考
+      // 为什么在header里面还能够全屏显示呢？跟fixed布局有关系？
+      top: 0
+      left: 0
+      width: 100%
+      height: 100%
+      overflow: auto //不能用hiddeh不然超过屏幕不能滚动
+      background: rgba(7, 17, 27, 0.8)
+      .detail-wrapper
+        width: 100%
+        min-height: 100%
+        .detail-main
+          margin-top: 64px
+          padding-bottom: 64px//一定要用padding
+      .detail-close // 层级没有对导致css样式没有找到
+        position: relative
+        width: 32px
+        height: 32px
+        margin: -64px auto 0 auto
+        clear: both
+        font-size: 32px
+</style>
